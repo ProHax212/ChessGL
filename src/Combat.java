@@ -14,19 +14,48 @@ public class Combat {
 
     private static final double ADVANTAGE_MODIFIER = 0.2;
 
-    Random random = new Random();
+    private Character c1, c2;    // The characters involved in combat
+    private int d1, d2; // Damage for each character
+    private Random r = new Random();
 
-    public void attack(Character c1, Character c2){
-        int damage = random.nextInt(advantage(c1.equipped, c2.equipped));
-        c2.health -= damage;
-        System.out.println(c1.name + " attacked " + c2.name + " for " + damage + " HP: (" + c2.health + " HP remaining)");
-        if(c2.health <= 0) System.out.println(c1.name + " WON!");
+    // Constructor - set the characters
+    public Combat(Character c1, Character c2){
+        this.c1 = c1; this.c2 = c2;
+        this.d1 = r.nextInt(advantage(c1, c2));
+        this.d2 = r.nextInt(advantage(c2, c1));
     }
 
+    // Character 1 attacks character 2
+    public void attack(){
 
+        // Character 1 attacks
+        c2.health -= d1;
+
+        // Debug printing
+        System.out.println(c1.name + " attacked " + c2.name + " for " + d1 + " HP: (" + c2.health + " HP remaining)");
+        if(c2.health <= 0){
+            System.out.println(c1.name + " WON!");
+            return;
+        }
+
+        // Character 2 counter attacks
+        if(c2.health > 0){
+            c1.health -= d2;
+            System.out.println(c2.name + " attacked " + c1.name + " for " + d2 + " HP: (" + c1.health + " HP remaining)");
+        }
+
+        // Debug printing
+        if(c1.health <= 0){
+            System.out.println(c2.name + " WON!");
+        }
+    }
 
     // Change the damage based on the weapon type (Weapon Triangle)
-    private int advantage(Weapon w1, Weapon w2){
+    private int advantage(Character c1, Character c2){
+
+        // Weapons for each character
+        Weapon w1=c1.equipped, w2=c2.equipped;
+
         int damageLess = (int)(w1.damage * (1 - ADVANTAGE_MODIFIER));
         int damageMore = (int)(w1.damage * (1 + ADVANTAGE_MODIFIER));
         int damage = w1.damage;

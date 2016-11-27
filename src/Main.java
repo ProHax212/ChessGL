@@ -1,4 +1,5 @@
 import models.Character;
+import models.Stats;
 import models.Weapon;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
@@ -103,16 +104,14 @@ public class Main {
 
     public static void main(String[] args) {
 //        new Main().run();
-        Character Ryan = new Character(new Weapon[]{new Weapon(Weapon.WeaponType.SWORD, 10)}, 30, "Ryan");
-        Character Justin = new Character(new Weapon[]{new Weapon(Weapon.WeaponType.SPEAR, 10)}, 30, "Justin");
-
-        Combat c = new Combat();
+        Stats s = new Stats(10);
+        Character Ryan = new Character("Ryan", new Weapon[]{new Weapon(Weapon.WeaponType.SWORD, 10)}, 30, s);
+        Character Justin = new Character("Justin", new Weapon[]{new Weapon(Weapon.WeaponType.SPEAR, 10)}, 30, s);
 
         while(true){
-            c.attack(Ryan, Justin);
-            if(Justin.health <= 0) break;
-            c.attack(Justin, Ryan);
-            if(Ryan.health <= 0) break;
+            Combat c = new Combat(Ryan, Justin);
+            c.attack();
+            if(Ryan.health <= 0 || Justin.health <= 0) break;
             System.out.println();
         }
     }
