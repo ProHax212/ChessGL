@@ -5,10 +5,12 @@ package models;
  */
 public class Weapon {
 
+    public String name;
+
     public WeaponType type;
     public int damage;
 
-    public Weapon(WeaponType type, int damage){
+    public Weapon(String name, WeaponType type, int damage){
         this.type = type;
         this.damage = damage;
     }
