@@ -5,6 +5,10 @@ import graphics.TextureState;
 
 import java.io.IOException;
 
+import static models.ChessSlot.slotDistance;
+import static models.ChessSlot.xOffset;
+import static models.ChessSlot.yOffset;
+
 /**
  * Created by Ryan_Comer on 12/22/2016.
  */
@@ -15,14 +19,11 @@ public class ChessPiece {
     private Type type;
     private int player;
 
-    private static float slotDistance = 0.22f;
-    private static float xOffset = 0.13f;
-    private static float yOffset = 0.31f;
-
     public ChessPiece(int player, Type t, int x, int y, int width, int height){
         type = t;
         this.x = x;
         this.y = y;
+        this.player = player;
 
         float texX=0f, texY=0f;
 
@@ -92,5 +93,17 @@ public class ChessPiece {
 
     public TextureState getTextureState() {
         return textureState;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getPlayer() {
+        return player;
     }
 }

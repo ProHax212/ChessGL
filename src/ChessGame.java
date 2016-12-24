@@ -5,6 +5,8 @@ import models.ChessPiece.Type;
 import models.ChessSlot;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static models.ChessPiece.Type.*;
 
@@ -36,7 +38,7 @@ public class ChessGame {
     private void initSlots(){
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++){
-                board[i][j] = new ChessSlot(null);
+                board[i][j] = new ChessSlot(null, j, i);
             }
         }
     }
@@ -115,8 +117,183 @@ public class ChessGame {
         return null;
     }
 
-    public void setHighlighted(ChessSlot slot){
+    /*
+    Highlight the possible moves for the selected piece
+     */
+    public void highlightMoves(ChessSlot slot){
+        if(slot.getPiece().getPlayer() != playerTurn) return;
 
+        List<Integer> xVals = new ArrayList<>(), yVals = new ArrayList<>();
+        int xStart = slot.getPiece().getX(), yStart = slot.getPiece().getY();
+
+        switch (slot.getPiece().getType()){
+            case PAWN:
+                if(playerTurn == 0){
+                    if((yStart + 1) <= 7){
+                        if((xStart - 1) >= 0){
+                            xVals.add(xStart-1); yVals.add(yStart+1);
+                        }
+                        if((xStart + 1) <= 7){
+                            xVals.add(xStart+1); yVals.add(yStart+1);
+                        }
+                    }
+                }else{
+                    if((yStart - 1) >= 0){
+                        if((xStart - 1) >= 0){
+                            xVals.add(xStart-1); yVals.add(yStart-1);
+                        }
+                        if((xStart + 1) <= 7){
+                            xVals.add(xStart+1); yVals.add(yStart-1);
+                        }
+                    }
+                }
+                break;
+            case ROOK:
+                for(int i = 0; i < 8; i++){
+                    if(i != xStart){
+                        xVals.add(i);
+                        yVals.add(yStart);
+                    }
+                    if(i != yStart){
+                        xVals.add(xStart);
+                        yVals.add(i);
+                    }
+                }
+                break;
+            case KNIGHT:
+                int x = xStart-2; int y = yStart-1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                x = xStart-2; y = yStart+1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                x = xStart+2; y = yStart-1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                x = xStart+2; y = yStart+1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                y = yStart-2; x = xStart-1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                y = yStart-2; x = xStart+1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                y = yStart+2; x = xStart-1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+
+                y = yStart+2; x = xStart+1;
+                if(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    xVals.add(x); yVals.add(y);
+                }
+                break;
+            case BISHOP:
+                for(int i=1; i<8; i++){
+                    if((xStart-i >= 0) && yStart-i >= 0) {
+                        xVals.add(xStart - i);
+                        yVals.add(yStart - i);
+                    }
+                    if(xStart+i < 8 && yStart-i >= 0){
+                        xVals.add(xStart+i);
+                        yVals.add(yStart-i);
+                    }
+                    if(xStart-i >= 0 && yStart+i < 8){
+                        xVals.add(xStart-i);
+                        yVals.add(yStart+i);
+                    }
+                    if(xStart+i < 8 && yStart+i < 8){
+                        xVals.add(xStart+i);
+                        yVals.add(yStart+i);
+                    }
+                }
+                break;
+            case QUEEN:
+                for(int i = 0; i < 8; i++){
+                    if(i != xStart){
+                        xVals.add(i);
+                        yVals.add(yStart);
+                    }
+                    if(i != yStart){
+                        xVals.add(xStart);
+                        yVals.add(i);
+                    }
+                }
+
+                for(int i=1; i<8; i++){
+                    if((xStart-i >= 0) && yStart-i >= 0) {
+                        xVals.add(xStart - i);
+                        yVals.add(yStart - i);
+                    }
+                    if(xStart+i < 8 && yStart-i >= 0){
+                        xVals.add(xStart+i);
+                        yVals.add(yStart-i);
+                    }
+                    if(xStart-i >= 0 && yStart+i < 8){
+                        xVals.add(xStart-i);
+                        yVals.add(yStart+i);
+                    }
+                    if(xStart+i < 8 && yStart+i < 8){
+                        xVals.add(xStart+i);
+                        yVals.add(yStart+i);
+                    }
+                }
+                break;
+            case KING:
+                if(xStart-1 >= 0){
+                    xVals.add(xStart-1); yVals.add(yStart);
+                    if(yStart-1 >= 0){
+                        xVals.add(xStart-1); yVals.add(yStart-1);
+                    }
+                    if(yStart+1 < 8){
+                        xVals.add(xStart-1); yVals.add(yStart+1);
+                    }
+                }
+                if(xStart+1 < 8){
+                    xVals.add(xStart+1); yVals.add(yStart);
+                    if(yStart-1 >= 0){
+                        xVals.add(xStart+1); yVals.add(yStart-1);
+                    }
+                    if(yStart+1 < 8){
+                        xVals.add(xStart+1); yVals.add(yStart+1);
+                    }
+                }
+                if(yStart-1 >= 0){
+                    xVals.add(xStart); yVals.add(yStart-1);
+                }
+                if(yStart+1 < 8){
+                    xVals.add(xStart); yVals.add(yStart+1);
+                }
+                break;
+        }
+
+        for(int i = 0; i < xVals.size(); i++){
+            board[yVals.get(i)][xVals.get(i)].setHighlighted(true);
+        }
+    }
+
+    /*
+    Clear all of the highlighted flags
+     */
+    public void clearHighlight(){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                board[i][j].setHighlighted(false);
+            }
+        }
     }
 
     public String toString(){

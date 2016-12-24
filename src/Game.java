@@ -14,6 +14,9 @@ import org.lwjgl.opengl.GLCapabilities;
 import java.io.IOException;
 import java.util.Random;
 
+import static models.ChessSlot.slotDistance;
+import static models.ChessSlot.xOffset;
+import static models.ChessSlot.yOffset;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -21,7 +24,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Game {
 
     public static int WIDTH=800, HEIGHT=800;
-    public static float scalingFactor = .8f;
+    public static float scalingFactor = 800f/1200f;
     public long window;
     private GLCapabilities capabilities;
 
@@ -49,14 +52,16 @@ public class Game {
         glfwGetCursorPos(window, x, y);
 
         ChessSlot slot = chessGame.mouseClick((int)x[0], HEIGHT - (int)y[0]);
-        if(slot.getPiece() != null) slotClicked(slot);
+        if(slot != null) slotClicked(slot);
     }
 
     private void slotClicked(ChessSlot slot){
         if(state == State.NORMAL){
-            slot.setHighlighted(true);
-
+            chessGame.highlightMoves(slot);
             state = State.PIECE_CLICKED;
+        }else{
+            chessGame.clearHighlight();
+            state = State.NORMAL;
         }
     }
 
