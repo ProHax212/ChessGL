@@ -57,9 +57,13 @@ public class Game {
 
     private void slotClicked(ChessSlot slot){
         if(state == State.NORMAL){
-            chessGame.highlightMoves(slot);
-            state = State.PIECE_CLICKED;
+            if(chessGame.highlightMoves(slot)) {
+                chessGame.setSelectedSlot(slot);
+                state = State.PIECE_CLICKED;
+            }
         }else{
+            if(chessGame.movePiece(slot)) chessGame.swapTurns();
+            chessGame.setSelectedSlot(null);
             chessGame.clearHighlight();
             state = State.NORMAL;
         }

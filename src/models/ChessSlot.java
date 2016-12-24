@@ -13,6 +13,7 @@ public class ChessSlot {
     private ChessPiece piece;
     private TextureState highlight;
     private boolean isHighlighted;
+    private int x, y;
 
     public static float slotDistance = 0.22f;
     public static float xOffset = 0.13f;
@@ -21,6 +22,7 @@ public class ChessSlot {
     public ChessSlot(ChessPiece piece, int x, int y){
         this.piece = piece;
         isHighlighted = false;
+        this.x = x; this.y = y;
 
         try {
             highlight = new TextureState(new Texture("./res/highlight.png", 0f, 0f));
@@ -56,5 +58,25 @@ public class ChessSlot {
 
     public void setHighlighted(boolean highlighted) {
         isHighlighted = highlighted;
+    }
+
+    public TextureState getHighlight() {
+        return highlight;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 }

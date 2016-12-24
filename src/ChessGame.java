@@ -18,6 +18,7 @@ public class ChessGame {
     private ChessSlot[][] board = new ChessSlot[8][8];
     private int playerTurn = 0;
     private TextureState background;
+    private ChessSlot selectedSlot;
 
     public ChessGame(){
         initSlots();
@@ -101,10 +102,9 @@ public class ChessGame {
 
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++){
-                ChessPiece comp = board[i][j].getPiece();
-                if(comp == null) continue;
+                ChessSlot slot = board[i][j];
+                Texture tex = slot.getHighlight().getTexture();
 
-                Texture tex = comp.getTextureState().getTexture();
                 float x1 = tex.getX();
                 float y1 = tex.getY();
                 float x2 = x1+((float)tex.getTexWidth() / (float)Game.WIDTH)*2;
@@ -120,8 +120,9 @@ public class ChessGame {
     /*
     Highlight the possible moves for the selected piece
      */
-    public void highlightMoves(ChessSlot slot){
-        if(slot.getPiece().getPlayer() != playerTurn) return;
+    public boolean highlightMoves(ChessSlot slot){
+        if(slot.getPiece() == null) return false;
+        if(slot.getPiece().getPlayer() != playerTurn) return false;
 
         List<Integer> xVals = new ArrayList<>(), yVals = new ArrayList<>();
         int xStart = slot.getPiece().getX(), yStart = slot.getPiece().getY();
@@ -130,34 +131,84 @@ public class ChessGame {
             case PAWN:
                 if(playerTurn == 0){
                     if((yStart + 1) <= 7){
+                        if(board[yStart+1][xStart].getPiece() == null) {
+                            xVals.add(xStart);
+                            yVals.add(yStart + 1);
+                        }
+                        if(slot.getPiece().isPawnFirstMove()){
+                            if(board[yStart+2][xStart].getPiece() == null){
+                                xVals.add(xStart);
+                                yVals.add(yStart+2);
+                            }
+                        }
                         if((xStart - 1) >= 0){
-                            xVals.add(xStart-1); yVals.add(yStart+1);
+                            if(board[yStart+1][xStart-1].getPiece() != null) {
+                                xVals.add(xStart - 1);
+                                yVals.add(yStart + 1);
+                            }
                         }
                         if((xStart + 1) <= 7){
-                            xVals.add(xStart+1); yVals.add(yStart+1);
+                            if(board[yStart+1][xStart+1].getPiece() != null) {
+                                xVals.add(xStart + 1);
+                                yVals.add(yStart + 1);
+                            }
                         }
                     }
                 }else{
                     if((yStart - 1) >= 0){
+                        if(board[yStart-1][xStart].getPiece() == null) {
+                            xVals.add(xStart);
+                            yVals.add(yStart - 1);
+                        }
+                        if(slot.getPiece().isPawnFirstMove()){
+                            if(board[yStart-2][xStart].getPiece() == null) {
+                                xVals.add(xStart);
+                                yVals.add(yStart - 2);
+                            }
+                        }
                         if((xStart - 1) >= 0){
-                            xVals.add(xStart-1); yVals.add(yStart-1);
+                            if(board[yStart-1][xStart-1].getPiece() != null) {
+                                xVals.add(xStart - 1);
+                                yVals.add(yStart - 1);
+                            }
                         }
                         if((xStart + 1) <= 7){
-                            xVals.add(xStart+1); yVals.add(yStart-1);
+                            if(board[yStart-1][xStart+1].getPiece() != null) {
+                                xVals.add(xStart + 1);
+                                yVals.add(yStart - 1);
+                            }
                         }
                     }
                 }
                 break;
             case ROOK:
-                for(int i = 0; i < 8; i++){
-                    if(i != xStart){
-                        xVals.add(i);
-                        yVals.add(yStart);
+                for(int x = xStart+1; x < 8; x++){
+                    if(board[yStart][x].getPiece() != null){
+                        xVals.add(x); yVals.add(yStart);
+                        break;
                     }
-                    if(i != yStart){
-                        xVals.add(xStart);
-                        yVals.add(i);
+                    xVals.add(x); yVals.add(yStart);
+                }
+                for(int x = xStart-1; x >= 0; x--){
+                    if(board[yStart][x].getPiece() != null){
+                        xVals.add(x); yVals.add(yStart);
+                        break;
                     }
+                    xVals.add(x); yVals.add(yStart);
+                }
+                for(int y = yStart+1; y < 8; y++){
+                    if(board[y][xStart].getPiece() != null){
+                        xVals.add(xStart); yVals.add(y);
+                        break;
+                    }
+                    xVals.add(xStart); yVals.add(y);
+                }
+                for(int y = yStart-1; y >= 0; y--){
+                    if(board[y][xStart].getPiece() != null){
+                        xVals.add(xStart); yVals.add(y);
+                        break;
+                    }
+                    xVals.add(xStart); yVals.add(y);
                 }
                 break;
             case KNIGHT:
@@ -202,54 +253,106 @@ public class ChessGame {
                 }
                 break;
             case BISHOP:
-                for(int i=1; i<8; i++){
-                    if((xStart-i >= 0) && yStart-i >= 0) {
-                        xVals.add(xStart - i);
-                        yVals.add(yStart - i);
+                for(int i=1; i<8; i++) {
+                    if(xStart-i < 0 || yStart-i < 0) break;
+                    if(board[yStart-i][xStart-i].getPiece() != null){
+                        xVals.add(xStart-i); yVals.add(yStart-i);
+                        break;
                     }
-                    if(xStart+i < 8 && yStart-i >= 0){
-                        xVals.add(xStart+i);
-                        yVals.add(yStart-i);
-                    }
-                    if(xStart-i >= 0 && yStart+i < 8){
-                        xVals.add(xStart-i);
-                        yVals.add(yStart+i);
-                    }
-                    if(xStart+i < 8 && yStart+i < 8){
-                        xVals.add(xStart+i);
-                        yVals.add(yStart+i);
-                    }
-                }
-                break;
-            case QUEEN:
-                for(int i = 0; i < 8; i++){
-                    if(i != xStart){
-                        xVals.add(i);
-                        yVals.add(yStart);
-                    }
-                    if(i != yStart){
-                        xVals.add(xStart);
-                        yVals.add(i);
-                    }
+                    xVals.add(xStart-i); yVals.add(yStart-i);
                 }
 
                 for(int i=1; i<8; i++){
-                    if((xStart-i >= 0) && yStart-i >= 0) {
-                        xVals.add(xStart - i);
-                        yVals.add(yStart - i);
+                    if(xStart+i > 7 || yStart-i < 0) break;
+                    if(board[yStart-i][xStart+i].getPiece() != null){
+                        xVals.add(xStart+i); yVals.add(yStart-i);
+                        break;
                     }
-                    if(xStart+i < 8 && yStart-i >= 0){
-                        xVals.add(xStart+i);
-                        yVals.add(yStart-i);
+                    xVals.add(xStart+i); yVals.add(yStart-i);
+                }
+
+                for(int i=1; i<8; i++){
+                    if(xStart-i < 0 || yStart+i > 7) break;
+                    if(board[yStart+i][xStart-i].getPiece() != null){
+                        xVals.add(xStart-i); yVals.add(yStart+i);
+                        break;
                     }
-                    if(xStart-i >= 0 && yStart+i < 8){
-                        xVals.add(xStart-i);
-                        yVals.add(yStart+i);
+                    xVals.add(xStart-i); yVals.add(yStart+i);
+                }
+
+                for(int i=1; i<8; i++){
+                    if(xStart+i > 7 || yStart+i > 7) break;
+                    if(board[yStart+i][xStart+i].getPiece() != null){
+                        xVals.add(xStart+i); yVals.add(yStart+i);
+                        break;
                     }
-                    if(xStart+i < 8 && yStart+i < 8){
-                        xVals.add(xStart+i);
-                        yVals.add(yStart+i);
+                    xVals.add(xStart+i); yVals.add(yStart+i);
+                }
+                break;
+            case QUEEN:
+                for(x = xStart+1; x < 8; x++){
+                    if(board[yStart][x].getPiece() != null){
+                        xVals.add(x); yVals.add(yStart);
+                        break;
                     }
+                    xVals.add(x); yVals.add(yStart);
+                }
+                for(x = xStart-1; x >= 0; x--){
+                    if(board[yStart][x].getPiece() != null){
+                        xVals.add(x); yVals.add(yStart);
+                        break;
+                    }
+                    xVals.add(x); yVals.add(yStart);
+                }
+                for(y = yStart+1; y < 8; y++){
+                    if(board[y][xStart].getPiece() != null){
+                        xVals.add(xStart); yVals.add(y);
+                        break;
+                    }
+                    xVals.add(xStart); yVals.add(y);
+                }
+                for(y = yStart-1; y >= 0; y--){
+                    if(board[y][xStart].getPiece() != null){
+                        xVals.add(xStart); yVals.add(y);
+                        break;
+                    }
+                    xVals.add(xStart); yVals.add(y);
+                }
+
+                for(int i=1; i<8; i++) {
+                    if(xStart-i < 0 || yStart-i < 0) break;
+                    if(board[yStart-i][xStart-i].getPiece() != null){
+                        xVals.add(xStart-i); yVals.add(yStart-i);
+                        break;
+                    }
+                    xVals.add(xStart-i); yVals.add(yStart-i);
+                }
+
+                for(int i=1; i<8; i++){
+                    if(xStart+i > 7 || yStart-i < 0) break;
+                    if(board[yStart-i][xStart+i].getPiece() != null){
+                        xVals.add(xStart+i); yVals.add(yStart-i);
+                        break;
+                    }
+                    xVals.add(xStart+i); yVals.add(yStart-i);
+                }
+
+                for(int i=1; i<8; i++){
+                    if(xStart-i < 0 || yStart+i > 7) break;
+                    if(board[yStart+i][xStart-i].getPiece() != null){
+                        xVals.add(xStart-i); yVals.add(yStart+i);
+                        break;
+                    }
+                    xVals.add(xStart-i); yVals.add(yStart+i);
+                }
+
+                for(int i=1; i<8; i++){
+                    if(xStart+i > 7 || yStart+i > 7) break;
+                    if(board[yStart+i][xStart+i].getPiece() != null){
+                        xVals.add(xStart+i); yVals.add(yStart+i);
+                        break;
+                    }
+                    xVals.add(xStart+i); yVals.add(yStart+i);
                 }
                 break;
             case KING:
@@ -283,6 +386,8 @@ public class ChessGame {
         for(int i = 0; i < xVals.size(); i++){
             board[yVals.get(i)][xVals.get(i)].setHighlighted(true);
         }
+
+        return true;
     }
 
     /*
@@ -309,6 +414,26 @@ public class ChessGame {
         return returnString;
     }
 
+    public void setSelectedSlot(ChessSlot selectedSlot) {
+        this.selectedSlot = selectedSlot;
+    }
 
+    public boolean movePiece(ChessSlot slot){
+        if(!slot.isHighlighted()) return false;
+        if(slot.getPiece() != null && slot.getPiece().getPlayer() == playerTurn) return false;
 
+        ChessPiece piece = selectedSlot.getPiece();
+        piece.setX(slot.getX()); piece.setY(slot.getY());
+        piece.updateTexPos();
+        slot.setPiece(piece);
+        selectedSlot.setPiece(null);
+
+        if(piece.getType() == PAWN && piece.isPawnFirstMove()) piece.setPawnFirstMove(false);
+
+        return true;
+    }
+
+    public void swapTurns(){
+        playerTurn = 1 - playerTurn;    // Swap between 0 and 1
+    }
 }

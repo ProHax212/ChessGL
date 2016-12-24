@@ -19,11 +19,14 @@ public class ChessPiece {
     private Type type;
     private int player;
 
+    private boolean pawnFirstMove;
+
     public ChessPiece(int player, Type t, int x, int y, int width, int height){
         type = t;
         this.x = x;
         this.y = y;
         this.player = player;
+        this.pawnFirstMove = true;
 
         float texX=0f, texY=0f;
 
@@ -74,6 +77,14 @@ public class ChessPiece {
         textureState.render();
     }
 
+    public void updateTexPos(){
+        Texture tex = textureState.getTexture();
+
+        tex.setX((-1f + x*slotDistance) + xOffset) ;
+        tex.setY(1f - yOffset - (y*slotDistance));
+        textureState.updateVbo();
+    }
+
     public String toString(){
         return "X: " + this.x + "\tY: " + this.y + "\tType: " + this.type;
     }
@@ -103,7 +114,23 @@ public class ChessPiece {
         return y;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
     public int getPlayer() {
         return player;
+    }
+
+    public boolean isPawnFirstMove() {
+        return pawnFirstMove;
+    }
+
+    public void setPawnFirstMove(boolean pawnFirstMove) {
+        this.pawnFirstMove = pawnFirstMove;
     }
 }
